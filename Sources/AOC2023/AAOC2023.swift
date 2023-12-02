@@ -4,7 +4,7 @@ import AOC2023Core
 @main
 struct AOC2023: ParsableCommand, AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-        abstract: "Runs the AOC for 2022"
+        abstract: "Runs the AOC for 2023"
     )
 
     @Argument(help: "The day that should be run (1-25)")
@@ -17,7 +17,7 @@ struct AOC2023: ParsableCommand, AsyncParsableCommand {
     private var useTestInput: Bool = false
 
     func run() async throws {
-        print("running AOC2021 day \(day) part \(part). Using Test Input? \(useTestInput)")
+        print("running AOC2023 day \(day) part \(part). Using Test Input? \(useTestInput)")
         guard 1...25 ~= day  else {
             throw Error.invalidDay
         }
