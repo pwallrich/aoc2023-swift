@@ -3,9 +3,9 @@ import RegexBuilder
 
 class Day2: Day {
     var day: Int { 2 }
-    let input: [[(blue: Int, red: Int, green: Int)]]
+    let input: String
 
-    static let gameRegex = Regex {
+    let gameRegex = Regex {
         TryCapture {
             OneOrMore(.digit)
         } transform: {
@@ -17,14 +17,6 @@ class Day2: Day {
                 "red"
                 "green"
                 "blue"
-            }
-        }
-        Capture {
-            ChoiceOf {
-                ","
-                ";"
-                "\n"
-                ""
             }
         }
     }
@@ -43,64 +35,38 @@ Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green
         } else {
             inputString = try InputGetter.getInput(for: 2, part: .first)
         }
-
-        let matches = inputString
-            .matches(of: Self.gameRegex)
-
-        var input: [[(blue: Int, red: Int, green: Int)]] = []
-        var currentGame: [(blue: Int, red: Int, green: Int)] = []
-        var currentRound: (blue: Int, red: Int, green: Int) = (0,0,0)
-
-        for match in matches {
-            switch match.output.2 {
-            case "green":
-                currentRound.green = match.output.1
-            case "blue":
-                currentRound.blue = match.output.1
-            case "red":
-                currentRound.red = match.output.1
-            default:
-                fatalError()
-            }
-
-            switch match.output.3 {
-            case ";":
-                currentGame.append(currentRound)
-                currentRound = (0,0,0)
-            case "\n":
-                currentGame.append(currentRound)
-                currentRound = (0,0,0)
-                input.append(currentGame)
-                currentGame = []
-            case "":
-                currentGame.append(currentRound)
-                input.append(currentGame)
-            default:
-                break
-            }
-        }
-        self.input = input
-
+        self.input = inputString
     }
 
     func runPart1() throws {
+        let valid: [Substring: Int] = [
+            "red": 12,
+            "green": 13,
+            "blue": 14
+        ]
         let result = input
+            .split(separator: "\n")
             .enumerated()
-            .filter {
-                !$0.element.contains(where: { $0.blue > 14 || $0.green > 13 || $0.red > 12 })
-            }.map { $0.offset + 1 }
+            .filter { (idx, row) in
+                return !row.matches(of: gameRegex)
+                    .contains { valid[$0.output.2]! < $0.output.1 }
+            }
+            .map { $0.offset + 1}
             .reduce(0, +)
         print(result)
     }
 
     func runPart2() throws {
         let result = input
-            .map { row -> (red: Int, blue: Int, green: Int) in
-                let maxRed = row.map(\.red).max()!
-                let maxBlue = row.map(\.blue).max()!
-                let maxGreen = row.map(\.green).max()!
-                return (maxRed, maxBlue, maxGreen)
-            }.map { $0.0 * $0.1 * $0.2  }
+            .split(separator: "\n")
+            .map { row in
+                let cubesNeeded = row.matches(of: gameRegex)
+                    .reduce(into: [Substring:Int]()) { res, curr in
+                        let currentMax = res[curr.output.2, default: 0]
+                        res[curr.output.2] = max(currentMax, curr.output.1)
+                    }
+                return cubesNeeded.values.reduce(1, *)
+            }
             .reduce(0, +)
         print(result)
     }
