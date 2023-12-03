@@ -27,6 +27,7 @@ public final class AOC2023 {
 
     private func getDay(_ number: Int) throws -> Day {
         switch number {
+		case 3: return try Day3(testInput: testInput)
 		case 2: return try Day2(testInput: testInput)
         case 1: return try Day1(testInput: testInput)
         default: throw DayError.notImplemented
