@@ -23,7 +23,7 @@ class Day3: Day {
 617*......
 .....+.58.
 ..592.....
-......598.
+......755.
 ...$.*....
 .664.598..
 """
@@ -34,9 +34,9 @@ class Day3: Day {
     }
 
     func runPart1() throws {
-        let rowLength = input.enumerated().first { $0.element == "\n" }!.offset
+        let rowLength = input.enumerated().first { $0.element == "\n" }!.offset + 1
 
-        let input = input.filter { !$0.isNewline }
+        let input = input
         var res = 0
         for match in input.matches(of: regex) where input.isPart(range: match.range, rowLength: rowLength) {
 //            print("adding \(match.output.1)")
@@ -48,12 +48,11 @@ class Day3: Day {
     }
 
     func runPart2() throws {
-        let rowLength = input.enumerated().first { $0.element == "\n" }!.offset
+        let rowLength = input.enumerated().first { $0.element == "\n" }!.offset + 1
 
-        let input: [Character] = input.filter { !$0.isNewline }
+        let input: [Character] = Array(input)
         var res = 0
         for (idx, char) in input.enumerated() where char == "*" {
-
             var points: [Int] = []
             // keep track, so no duplicates are added
             var usedIndices: Set<Int> = []
@@ -96,29 +95,33 @@ class Day3: Day {
 
 private extension String {
     func isPart(range: Range<String.Index>, rowLength: Int) -> Bool {
+        func isValid(_ character: Character) -> Bool {
+            !(character == "." || character.isNumber || character.isNewline)
+        }
         let startIdx = distance(from: startIndex, to: range.lowerBound)
         let endIdx = distance(from: startIndex, to: range.upperBound)
         // symbol before
-        if startIdx - 1 > 0 {
+        if startIdx - 1 >= 0 {
             let char = self[index(before: range.lowerBound)]
-            if !(char == "." || char.isNumber) {
+            if isValid(char) {
                 return true
             }
         }
+
         // symbol after
         if endIdx < self.count {
             let char = self[range.upperBound]
-            if !(char == "." || char.isNumber || char.isNewline) {
+            if isValid(char) {
                 return true
             }
         }
         // up
-        if (startIdx - rowLength) - 1 > 0 {
+        if (startIdx - rowLength) - 1 >= 0 {
             let start = index(startIndex, offsetBy: startIdx - rowLength - 1)
             let end = index(startIndex, offsetBy: endIdx - rowLength)
             let substring = self[start...end]
             for char in substring {
-                if !(char == "." || char.isNumber || char.isNewline) {
+                if isValid(char) {
                     return true
                 }
             }
@@ -129,7 +132,7 @@ private extension String {
             let end = index(startIndex, offsetBy: endIdx + rowLength)
             let substring = self[start...end]
             for char in substring {
-                if !(char == "." || char.isNumber || char.isNewline) {
+                if isValid(char) {
                     return true
                 }
             }
