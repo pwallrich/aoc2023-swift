@@ -86,50 +86,27 @@ humidity-to-location map:
     func runPart2() throws {
         let rows = input.split(separator: "\n")
         var seedRanges = getSeedRanges(from: rows[0])
+            .sorted { $0.lowerBound < $1.lowerBound }
         let mappings = getMappings(from: rows)
-        // THE SOLUTION ONLY WORKS, BECAUSE THERE ARE NO OVERLAPPING RANGES!!!
-
-//        for mapping in mappings {
-//            for (mappingRange, _) in mapping {
-//                for (other, _ ) in mapping {
-//                    guard other != mappingRange else { continue }
-//                    assert(!mappingRange.overlaps(other))
-//                }
-//            }
-//        }
 
         for mapping in mappings {
             var mappedSeeds: [Range<Int>] = []
+            let sortedMappings = mapping.sorted { $0.key.lowerBound < $1.key.lowerBound }
+
             for seedRange in seedRanges {
-                var currMapped: [Range<Int>: Int] = [:]
-                // do mapping for all the values, that are in the specific ranges
-                for (mappingRange, offset) in mapping where mappingRange.overlaps(seedRange) {
-                    let lower = max(mappingRange.lowerBound, seedRange.lowerBound)
-                    let upper = min(mappingRange.upperBound, seedRange.upperBound)
-
-                    currMapped[lower..<upper] = offset
-                }
-
-                guard !currMapped.isEmpty else {
-                    mappedSeeds.append(seedRange)
-                    continue
-                }
-                let sorted = currMapped.sorted { $0.key.lowerBound < $1.key.lowerBound }
                 var currentLowest = seedRange.lowerBound
-                // actually map each mapped region and fill up the spaces in between
-                for mapped in sorted {
-                    if mapped.key.lowerBound <= currentLowest {
-                        mappedSeeds.append((mapped.key.lowerBound + mapped.value)..<(mapped.key.upperBound + mapped.value))
-                    } else {
-                        mappedSeeds.append(currentLowest..<mapped.key.lowerBound)
-                        mappedSeeds.append((mapped.key.lowerBound + mapped.value)..<(mapped.key.upperBound + mapped.value))
+                for (mappingRange, offset) in sortedMappings where mappingRange.overlaps(seedRange) {
+                    if currentLowest < mappingRange.lowerBound {
+                        mappedSeeds.append(currentLowest..<mappingRange.lowerBound)
                     }
-                    currentLowest = mapped.key.upperBound
+                    let lower = max(currentLowest, mappingRange.lowerBound) + offset
+                    let upper = min(mappingRange.upperBound, seedRange.upperBound) + offset
+                    mappedSeeds.append(lower..<upper)
+                    currentLowest = min(mappingRange.upperBound, seedRange.upperBound)
                 }
                 if currentLowest < seedRange.upperBound {
                     mappedSeeds.append(currentLowest..<seedRange.upperBound)
                 }
-
             }
             seedRanges = mappedSeeds
         }
