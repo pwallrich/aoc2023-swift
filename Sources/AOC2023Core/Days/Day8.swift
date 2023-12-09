@@ -50,24 +50,26 @@ XXX = (XXX, XXX)
     }
 
     func runPart1() throws {
-        let result = calculateStepsToFinish(start: "AAA")
+        let result = calculateStepsToFinish(start: "AAA") { $0 == "ZZZ" }
         print(result)
     }
 
     func runPart2() async throws {
         let current: [Substring] = input.mapping.keys.filter { $0.last == "A" }
-        let stepsNeeded = current.map { calculateStepsToFinish(start: $0) }
+        let stepsNeeded = current.map { 
+            calculateStepsToFinish(start: $0) { $0.last == "Z"}
+        }
 
         print(leastCommonMultiple(numbers: stepsNeeded))
     }
 
-    func calculateStepsToFinish(start: Substring) -> Int {
+    func calculateStepsToFinish(start: Substring, isFinished: (Substring) -> Bool) -> Int {
         print("calculating \(start)")
         var current: Substring = start
         var steps = 0
         var idx = input.directions.startIndex
 
-        while current.last != "Z" {
+        while isFinished(current) {
             let directions = input.directions[idx]
             let nextValues = input.mapping[current]!
             switch directions {
