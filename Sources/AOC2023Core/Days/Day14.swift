@@ -103,9 +103,7 @@ extension Dictionary where Key == Point2D, Value == Character {
         }
     }
     mutating func moveNorth(width: Int, height: Int) {
-        var hasMoved = false
-        var step = 0
-        var toMove = self.filter { $0.value == "O" }.sorted { lhs, rhs in
+        let toMove = self.filter { $0.value == "O" }.sorted { lhs, rhs in
             if lhs.key.y < rhs.key.y {
                 return true
             }
@@ -114,34 +112,27 @@ extension Dictionary where Key == Point2D, Value == Character {
             }
             return lhs.key.x < rhs.key.x
         }
-        repeat {
-//            next.prettyPrint(width: width, height: height)
-//            if step % 10 == 0 {
-//                print("at \(step)")
-//            }
-//            print()
-            hasMoved = false
 
-            for (idx, (point, char)) in toMove.enumerated() {
-                let north = point.adding(Point2D(x: 0, y: -1))
-                guard north.y >= 0, self[north] == nil else {
-                    continue
+        for (point, char) in toMove {
+            guard point.y > 0 else { continue }
+
+            var north: Point2D = point
+            while north.y > 0 {
+                let point = north.adding(.init(x: 0, y: -1))
+                guard self[point] == nil else {
+                    break
                 }
-                self[point] = nil
-                self[north] = char
-                hasMoved = true
-                toMove[idx] = (north, char)
-            }
-            step += 1
 
-        } while hasMoved
+                north = point
+            }
+
+            self[point] = nil
+            self[north] = char
+        }
     }
 
     mutating func moveSouth(width: Int, height: Int) {
-        var hasMoved = false
-
-        var step = 0
-        var toMove = self.filter { $0.value == "O" }.sorted { lhs, rhs in
+        let toMove = self.filter { $0.value == "O" }.sorted { lhs, rhs in
             if lhs.key.y > rhs.key.y {
                 return true
             }
@@ -150,33 +141,26 @@ extension Dictionary where Key == Point2D, Value == Character {
             }
             return lhs.key.x < rhs.key.x
         }
-        repeat {
-//            next.prettyPrint(width: width, height: height)
-//            if step % 10 == 0 {
-//                print("at \(step)")
-//            }
-//            print()
-            hasMoved = false
 
-            for (idx, (point, char)) in toMove.enumerated() {
-                let south = point.adding(Point2D(x: 0, y: 1))
-                guard south.y < height, self[south] == nil else {
-                    continue
+        for (point, char) in toMove {
+            guard point.y < height - 1 else { continue }
+            var south: Point2D = point
+            while south.y < height - 1 {
+                let point = south.adding(.init(x: 0, y: 1))
+                guard self[point] == nil else {
+                    break
                 }
-                self[point] = nil
-                self[south] = char
-                hasMoved = true
-                toMove[idx] = (south, char)
+                south = point
             }
-            step += 1
 
-        } while hasMoved
+            self[point] = nil
+            self[south] = char
+        }
     }
 
     mutating func moveEast(width: Int, height: Int) {
-        var hasMoved = false
-        var step = 0
-        var toMove = self.filter { $0.value == "O" }.sorted { lhs, rhs in
+
+        let toMove = self.filter { $0.value == "O" }.sorted { lhs, rhs in
             if lhs.key.x > rhs.key.x {
                 return true
             }
@@ -185,33 +169,24 @@ extension Dictionary where Key == Point2D, Value == Character {
             }
             return lhs.key.y < rhs.key.y
         }
-        repeat {
-//            next.prettyPrint(width: width, height: height)
-//            if step % 10 == 0 {
-//                print("at \(step)")
-//            }
-//            print()
-            hasMoved = false
 
-            for (idx, (point, char)) in toMove.enumerated() {
-                let east = point.adding(Point2D(x: 1, y: 0))
-                guard east.x < width, self[east] == nil else {
-                    continue
+        for (point, char) in toMove {
+            guard point.x < width - 1 else { continue }
+            var east: Point2D = point
+            while east.x < width - 1 {
+                let point = east.adding(.init(x: 1, y: 0))
+                guard self[point] == nil else {
+                    break
                 }
-                self[point] = nil
-                self[east] = char
-                hasMoved = true
-                toMove[idx] = (east, char)
+                east = point
             }
-            step += 1
-
-        } while hasMoved
+            self[point] = nil
+            self[east] = char
+        }
     }
 
     mutating func moveWest(width: Int, height: Int) {
-        var hasMoved = false
-
-        var toMove = self.filter { $0.value == "O" }.sorted { lhs, rhs in
+        let toMove = self.filter { $0.value == "O" }.sorted { lhs, rhs in
             if lhs.key.x < rhs.key.x {
                 return true
             }
@@ -220,28 +195,19 @@ extension Dictionary where Key == Point2D, Value == Character {
             }
             return lhs.key.y < rhs.key.y
         }
-        var step = 0
-        repeat {
-//            next.prettyPrint(width: width, height: height)
-//            if step % 10 == 0 {
-//                print("at \(step)")
-//            }
-//            print()
-            hasMoved = false
-
-            for (idx, (point, char)) in toMove.enumerated() {
-                let west = point.adding(Point2D(x: -1, y: 0))
-                guard west.x >= 0, self[west] == nil else {
-                    continue
+        for (point, char) in toMove {
+            guard point.x > 0 else { continue }
+            var west: Point2D = point
+            while west.x > 0 {
+                let point = west.adding(.init(x: -1, y: 0))
+                guard self[point] == nil else {
+                    break
                 }
-                self[point] = nil
-                self[west] = char
-                hasMoved = true
-                toMove[idx] = (west, char)
+                west = point
             }
-            step += 1
-
-        } while hasMoved
+            self[point] = nil
+            self[west] = char
+        }
     }
 
     func calculateLoad(height: Int) -> Int {
