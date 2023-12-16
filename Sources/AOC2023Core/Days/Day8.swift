@@ -69,7 +69,7 @@ XXX = (XXX, XXX)
         var steps = 0
         var idx = input.directions.startIndex
 
-        while isFinished(current) {
+        while !isFinished(current) {
             let directions = input.directions[idx]
             let nextValues = input.mapping[current]!
             switch directions {
