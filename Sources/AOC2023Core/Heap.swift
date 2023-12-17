@@ -7,81 +7,94 @@
 
 import Foundation
 
-class MinHeap<T: Comparable> {
-    var heap: [T] = []
-
-    // Insert a new element into the heap
-    func insert(_ element: T) {
-        heap.append(element)
-        var currentIndex = heap.count - 1
-
-        // Bubble up the element until the
-        // heap property is restored
-        while currentIndex > 0 && heap[currentIndex] > heap[(currentIndex-1)/2] {
-            heap.swapAt(currentIndex, (currentIndex-1)/2)
-            currentIndex = (currentIndex-1)/2
+/// This is a simple Heap implementation which can be used as a priority queue.
+class Heap<T:Comparable> {
+    typealias HeapComparator = (_ l:T,_ r:T) -> Bool
+    var heap = [T]()
+    var count:Int {
+        get {
+            heap.count
         }
     }
 
-    // Remove and return the top
-    // element of the heap
-    func remove() -> T? {
-        guard !heap.isEmpty else {
-            return nil
+    var comparator:HeapComparator
+
+
+    /// bubbleUp is called after appending the item to the end of the queue.  Depending on the comparator,
+    /// it will bubbleUp to its approriate spot
+    /// - Parameter idx: Index to bubble up.  This starts after insert with last index being passed in.
+    private func bubbleUp(idx:Int) {
+        let parent = (idx - 1) / 2
+
+        if idx <= 0 {
+            return
         }
 
-        let topElement = heap[0]
-
-        if heap.count == 1 {
-            heap.removeFirst()
-        } else {
-
-            // Replace the top element
-            // with the last element in
-            // the heap
-            heap[0] = heap.removeLast()
-            var currentIndex = 0
-
-            // Bubble down the element until
-            // the heap property is restored
-            while true {
-                let leftChildIndex = 2*currentIndex+1
-                let rightChildIndex = 2*currentIndex+2
-
-                // Determine the index of
-                // the larger child
-                var maxIndex = currentIndex
-                if leftChildIndex < heap.count && heap[leftChildIndex] < heap[maxIndex] {
-                    maxIndex = leftChildIndex
-                }
-                if rightChildIndex < heap.count && heap[rightChildIndex] < heap[maxIndex] {
-                    maxIndex = rightChildIndex
-                }
-
-                // If the heap property is
-                // restored, break out of the loop
-                if maxIndex == currentIndex {
-                    break
-                }
-
-                // Otherwise, swap the current
-                // element with its larger child
-                heap.swapAt(currentIndex, maxIndex)
-                currentIndex = maxIndex
-            }
+        if comparator(heap[idx], heap[parent]) {
+            heap.swapAt(parent, idx)
+            bubbleUp(idx: parent)
         }
-
-        return topElement
     }
 
-    // Get the top element of the
-    // heap without removing it
-    func peek() -> T? {
+
+    /// Heapify the current heap.  This method walks down the children and rearranges them in comparator order.
+    /// - Parameter idx: index to heapify.
+    private func heapify(_ idx:Int) {
+        let left = idx * 2 + 1
+        let right = idx * 2 + 2
+
+        var comp = idx
+
+        if count > left && comparator(heap[left], heap[comp]) {
+            comp = left
+        }
+        if count > right && comparator(heap[right], heap[comp]) {
+            comp = right
+        }
+        if comp != idx {
+            heap.swapAt(comp, idx)
+            heapify(comp)
+        }
+    }
+
+    init(comparator:@escaping HeapComparator) {
+        self.comparator = comparator
+    }
+
+
+    /// Insert item into the heap.  This walks up the parents. This is a O(log n) operation
+    /// - Parameter item: item that is comparable.
+    func insert(_ item:T) {
+        heap.append(item)
+        bubbleUp(idx: count-1)
+    }
+
+
+    /// Get the top item in the heap based on comparator. This is a 0(1) operation
+    /// - Returns: top item or nil if empty.
+    func getTop() -> T? {
         return heap.first
     }
 
-    // Check if the heap is empty
-    var isEmpty: Bool {
-        return heap.isEmpty
+
+    /// Remove the top item.  This is a O(log n) operation
+    /// - Returns: returns top item based on comparator or nil if empty.
+    func popTop() -> T? {
+        let item = heap.first
+        if count > 1 {
+            // set the top to the last element and heapify
+            // this means we can remove the last after "poping" the first.
+            heap[0] = heap[count-1]
+            heap.removeLast()
+            heapify(0)
+        }
+        else if count == 1{
+            heap.removeLast()
+        }
+        else {
+            return nil
+        }
+
+        return item
     }
 }

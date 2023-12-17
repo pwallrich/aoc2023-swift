@@ -38,9 +38,7 @@ class Day17: Day {
         for (y, row) in rows.enumerated() {
             var current: [Int] = []
             for (x, char) in row.enumerated() {
-//                let point = Point2D(x: x, y: y)
                 current.append(Int(String(char))!)
-//                grid[point] = Int(String(char))!
                 last = Point2D(x: x, y: y)
             }
             grid.append(current)
@@ -51,16 +49,10 @@ class Day17: Day {
         self.height = rows.count
     }
 
-    struct HeapItem: Comparable, Hashable {
+    struct HeapItem: Comparable {
         static func < (lhs: Day17.HeapItem, rhs: Day17.HeapItem) -> Bool {
             lhs.heuristic < rhs.heuristic
         }
-
-//        struct MoveDirection: Equatable {
-//            let dir: Direction
-//            let count: Int
-//        }
-
         let currentPoint: Point2D
         let direction: Direction
         let sum: Int
@@ -70,26 +62,31 @@ class Day17: Day {
             self.currentPoint = currentPoint
             self.direction = direction
             self.sum = sum
-            self.heuristic = sum + currentPoint.manhattan(to: destination) * 10
+            self.heuristic = sum
         }
-//        let path: [Point2D: [Direction]]
+    }
 
-
+    struct CacheItem: Hashable {
+        let currentPoint: Point2D
+        let direction: Direction
     }
 
     func runPart1() throws {
         let startPoint = Point2D(x: 0, y: 0)
         var currentBest: Int = .max
-        let heap = MinHeap<HeapItem>()
+
+        let heap = Heap<HeapItem>(comparator: <)
+
         heap.insert(.init(currentPoint: startPoint, direction: .up, sum: 0, destination: destination))
         heap.insert(.init(currentPoint: startPoint, direction: .left, sum: 0, destination: destination))
+
         var steps = 0
-        var seen: Set<HeapItem> = []
-        while !heap.isEmpty {
+        var seen = Array(repeating: Array(repeating: Array(repeating: Int.max, count: width), count: height), count: Direction.allCases.count)
+        while let current = heap.popTop() {
             if steps % 1000000 == 0 {
                 print(steps, heap.heap.count, currentBest)
             }
-            let current = heap.remove()!
+
             if current.currentPoint == destination {
                 currentBest = min(currentBest, current.sum)
                 continue
@@ -116,10 +113,10 @@ class Day17: Day {
                     currSum += grid[currPoint.y][currPoint.x]
 
                     let item = HeapItem(currentPoint: currPoint, direction: dir, sum: currSum, destination: destination)
-                    if seen.contains(item) {
+                    if seen[dir.rawValue][currPoint.y][currPoint.x] <= currSum {
                         continue
                     }
-                    seen.insert(item)
+                    seen[dir.rawValue][currPoint.y][currPoint.x] = currSum
                     heap.insert(item)
                 }
             }
@@ -131,16 +128,17 @@ class Day17: Day {
     func runPart2() throws {
         let startPoint = Point2D(x: 0, y: 0)
         var currentBest: Int = .max
-        let heap = MinHeap<HeapItem>()
+        let heap = Heap<HeapItem>(comparator: <)
+
         heap.insert(.init(currentPoint: startPoint, direction: .up, sum: 0, destination: destination))
         heap.insert(.init(currentPoint: startPoint, direction: .left, sum: 0, destination: destination))
         var steps = 0
-        var seen: Set<HeapItem> = []
-        while !heap.isEmpty {
+        var seen = Array(repeating: Array(repeating: Array(repeating: Int.max, count: width), count: height), count: Direction.allCases.count)
+
+        while let current = heap.popTop() {
             if steps % 1000000 == 0 {
                 print(steps, heap.heap.count, seen.count, currentBest)
             }
-            let current = heap.remove()!
             if current.currentPoint == destination {
                 currentBest = min(currentBest, current.sum)
                 continue
@@ -175,51 +173,15 @@ class Day17: Day {
                     currSum += grid[currPoint.y][currPoint.x]
 
                     let item = HeapItem(currentPoint: currPoint, direction: dir, sum: currSum, destination: destination)
-                    if seen.contains(item) {
+                    if seen[dir.rawValue][currPoint.y][currPoint.x] <= currSum {
                         continue
                     }
-                    seen.insert(item)
+                    seen[dir.rawValue][currPoint.y][currPoint.x] = currSum
                     heap.insert(item)
                 }
             }
             steps += 1
         }
         print(currentBest)
-    }
-}
-
-extension Array where Element == [Int] {
-    func prettyPrint(path: Set<Point2D>) {
-//        let maxX = keys.map(\.x).max()!
-//        let maxY = keys.map(\.y).max()!
-        for (y, row) in self.enumerated() {
-            for (x, value) in row.enumerated() {
-                let point = Point2D(x: x, y: y)
-                if path.contains(point) {
-                    print("*", terminator: "")
-                } else {
-                    print(value, terminator: "")
-                }
-            }
-            print()
-        }
-    }
-}
-
-extension Dictionary where Key == Point2D, Value == Int {
-    func prettyPrint(path: [Point2D]) {
-        let maxX = keys.map(\.x).max()!
-        let maxY = keys.map(\.y).max()!
-        for y in 0...maxY {
-            for x in 0...maxX {
-                let point = Point2D(x: x, y: y)
-                if path.contains(point) {
-                    print("*", terminator: "")
-                } else {
-                    print(self[.init(x: x, y: y)]!, terminator: "")
-                }
-            }
-            print()
-        }
     }
 }

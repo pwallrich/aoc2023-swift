@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum Direction: CaseIterable {
+enum Direction: Int, CaseIterable {
     case up, down, left, right
 
     var offset: Point2D {
