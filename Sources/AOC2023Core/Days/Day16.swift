@@ -151,22 +151,4 @@ class Day16: Day {
         let points = Set(seen.map(\.point))
         return points.count
     }
-
-    enum Direction {
-        case up, down, left, right
-
-        var offset: Point2D {
-            switch self {
-            case .up:
-                Point2D(x: 0, y: -1)
-            case .down:
-                Point2D(x: 0, y: 1)
-            case .left:
-                Point2D(x: -1, y: 0)
-            case .right:
-                Point2D(x: 1, y: 0)
-            }
-        }
-
-    }
 }
