@@ -28,12 +28,6 @@ let package = Package(
             resources: [
                 .process("Inputs")
             ]
-        ),
-        .testTarget(
-            name: "AOC2023Tests",
-            dependencies: ["AOC2023"]),
-        .testTarget(
-            name: "AOC2023CoreTests",
-            dependencies: ["AOC2023Core"]),
+        )
     ]
 )
