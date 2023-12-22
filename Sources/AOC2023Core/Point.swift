@@ -40,3 +40,29 @@ struct Point2D: Hashable {
         return res
     }
 }
+
+struct Point3D: Hashable {
+    let x: Int
+    let y: Int
+    let z: Int
+
+    func adding(_ other: Point3D) -> Point3D {
+        return .init(x: x + other.x, y: y + other.y, z: z + other.z)
+    }
+
+    func manhattan(to other: Point3D) -> Int {
+        return abs(x - other.x) + abs(y - other.y) + abs(z - other.z)
+    }
+
+    func adjacent() -> [Point3D] {
+        return [
+            adding(Point3D(x: 0, y: 0, z: 1)),
+            adding(Point3D(x: 0, y: 0, z: -1)),
+            adding(Point3D(x: 0, y: 1, z: 0)),
+            adding(Point3D(x: 0, y: -1, z: 0)),
+            adding(Point3D(x: 1, y: 0, z: 0)),
+            adding(Point3D(x: -1, y: 0, z: 0)),
+        ]
+
+    }
+}
