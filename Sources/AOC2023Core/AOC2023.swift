@@ -27,6 +27,7 @@ public final class AOC2023 {
 
     private func getDay(_ number: Int) throws -> Day {
         switch number {
+		case 21: return try Day21(testInput: testInput)
 		case 20: return try Day20(testInput: testInput)
 		case 19: return try Day19(testInput: testInput)
 		case 18: return try Day18(testInput: testInput)
