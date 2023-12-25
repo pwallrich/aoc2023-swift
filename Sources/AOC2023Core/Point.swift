@@ -66,3 +66,29 @@ struct Point3D: Hashable {
 
     }
 }
+
+struct DPoint3D: Hashable {
+    let x: Double
+    let y: Double
+    let z: Double
+
+    func adding(_ other: DPoint3D) -> DPoint3D {
+        return .init(x: x + other.x, y: y + other.y, z: z + other.z)
+    }
+
+    func manhattan(to other: DPoint3D) -> Double {
+        return abs(x - other.x) + abs(y - other.y) + abs(z - other.z)
+    }
+
+    func adjacent() -> [DPoint3D] {
+        return [
+            adding(DPoint3D(x: 0, y: 0, z: 1)),
+            adding(DPoint3D(x: 0, y: 0, z: -1)),
+            adding(DPoint3D(x: 0, y: 1, z: 0)),
+            adding(DPoint3D(x: 0, y: -1, z: 0)),
+            adding(DPoint3D(x: 1, y: 0, z: 0)),
+            adding(DPoint3D(x: -1, y: 0, z: 0)),
+        ]
+
+    }
+}
